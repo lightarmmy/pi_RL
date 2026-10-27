@@ -72,7 +72,9 @@ excluded from Git), and `h800_smoke_job.yaml` runs the short GPU integration
 test. These manifests contain cluster-specific image, namespace, storage, and
 GPU settings; change them for another site. The installer links existing
 LIBERO assets at a path outside this repository. On another machine, provide
-your own LIBERO assets and tokenizer before running the manifests.
+your own LIBERO assets and tokenizer before running the manifests. Give each
+new Kubernetes Job a new `metadata.name`; an existing Job's Pod template is
+immutable.
 
 ## RL checkpoint export and inference
 

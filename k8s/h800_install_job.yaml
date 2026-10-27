@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: xufanghui-pirl-install-libero-20261026-2105
+  name: xufanghui-pirl-install-libero-20261027-bootstrap
   namespace: dreamzero-training
 spec:
   backoffLimit: 0
