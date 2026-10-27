@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xufanghui-pirl-infer-check-20261027-1140
+  namespace: dreamzero-training
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: server-check
+          image: registry.d-robotics.cc/auwomo-auwomo/nemo-wan-training@sha256:d7c1f21e8dfc60051ccf6adb8141505736922ffb3c5fc2d960bd973bb40ed8fe
+          command: ["bash", "-lc"]
+          args:
+            - |
+              set -euo pipefail
+              cd /mnt/auwomo-data/xufanghui/pi_RL
+              mkdir -p /root/.cache/openpi/big_vision
+              cp artifacts/openpi_tokenizer/paligemma_tokenizer.model /root/.cache/openpi/paligemma_tokenizer.model
+              cp artifacts/openpi_tokenizer/paligemma_tokenizer.model /root/.cache/openpi/big_vision/paligemma_tokenizer.model
+              .venv_h800/bin/python scripts/serve_policy.py \
+                --checkpoint runs/h800-smoke-20261027-0030/exported_policy \
+                --config pi05_libero --discrete-state-input --self-test
+          resources:
+            requests:
+              cpu: "8"
+              memory: 32Gi
+            limits:
+              cpu: "16"
+              memory: 96Gi
+          volumeMounts:
+            - name: shared-data
+              mountPath: /mnt/auwomo-data
+      volumes:
+        - name: shared-data
+          hostPath: {path: /mnt/auwomo-data, type: Directory}

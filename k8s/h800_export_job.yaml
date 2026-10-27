@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xufanghui-pirl-export-20261027-0120
+  namespace: dreamzero-training
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: exporter
+          image: registry.d-robotics.cc/auwomo-auwomo/nemo-wan-training@sha256:d7c1f21e8dfc60051ccf6adb8141505736922ffb3c5fc2d960bd973bb40ed8fe
+          command: ["bash", "-lc"]
+          args:
+            - |
+              set -euo pipefail
+              cd /mnt/auwomo-data/xufanghui/pi_RL
+              .venv_h800/bin/python scripts/export_policy.py \
+                --checkpoint runs/h800-smoke-20261027-0030/libero_spatial_ppo_openpi_pi05/checkpoints/global_step_1/actor/model_state_dict/full_weights.pt \
+                --reference artifacts/public_pi05_libero \
+                --norm-stats artifacts/public_pi05_libero/physical-intelligence/libero/norm_stats.json \
+                --asset-id physical-intelligence/libero \
+                --output runs/h800-smoke-20261027-0030/exported_policy
+          resources:
+            requests:
+              cpu: "8"
+              memory: 64Gi
+            limits:
+              cpu: "16"
+              memory: 128Gi
+          volumeMounts:
+            - name: shared-data
+              mountPath: /mnt/auwomo-data
+      volumes:
+        - name: shared-data
+          hostPath: {path: /mnt/auwomo-data, type: Directory}

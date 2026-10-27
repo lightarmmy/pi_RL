@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xufanghui-pirl-install-libero-20261026-2105
+  namespace: dreamzero-training
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 10800
+  template:
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: installer
+          image: registry.d-robotics.cc/auwomo-auwomo/nemo-wan-training@sha256:d7c1f21e8dfc60051ccf6adb8141505736922ffb3c5fc2d960bd973bb40ed8fe
+          command: ["bash", "-lc"]
+          args:
+            - |
+              set -euo pipefail
+              cd /mnt/auwomo-data/xufanghui/pi_RL/RLinf
+              PIRL_VENV=/mnt/auwomo-data/xufanghui/pi_RL/.venv_h800
+              export UV_LINK_MODE=copy
+              if [ ! -x "$PIRL_VENV/bin/uv" ] && ! command -v uv >/dev/null 2>&1; then
+                python -m pip install uv
+              fi
+              export PATH="$PIRL_VENV/bin:$PATH"
+              uv --version
+              if [ ! -x "$PIRL_VENV/bin/python" ]; then
+                uv python install 3.11.15
+                uv venv --python 3.11.15 "$PIRL_VENV"
+              fi
+              if [ ! -x "$PIRL_VENV/bin/libero-download-assets" ]; then
+                uv pip install --python "$PIRL_VENV/bin/python" rlinf-libero==0.1.3
+              fi
+              mkdir -p /root/.cache/openpi/big_vision
+              cp /mnt/auwomo-data/xufanghui/pi_RL/artifacts/openpi_tokenizer/paligemma_tokenizer.model /root/.cache/openpi/paligemma_tokenizer.model
+              cp /mnt/auwomo-data/xufanghui/pi_RL/artifacts/openpi_tokenizer/paligemma_tokenizer.model /root/.cache/openpi/big_vision/paligemma_tokenizer.model
+              "$PIRL_VENV/bin/libero-download-assets" --link /mnt/auwomo-data/xufanghui/FastWAM_RL/LIBERO/libero/libero/assets
+              bash requirements/install.sh embodied --model openpi --env libero --venv "$PIRL_VENV" --python 3.11.15 --no-root --no-flash-attn --no-apex --no-natten --use-mirror
+              "$PIRL_VENV/bin/python" -c 'import rlinf, openpi, hydra, torch; print("rlinf/openpi", torch.__version__)'
+          resources:
+            requests:
+              cpu: "8"
+              memory: 32Gi
+            limits:
+              cpu: "16"
+              memory: 64Gi
+          volumeMounts:
+            - name: shared-data
+              mountPath: /mnt/auwomo-data
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: shared-data
+          hostPath: {path: /mnt/auwomo-data, type: Directory}
+        - name: dshm
+          emptyDir: {medium: Memory, sizeLimit: 8Gi}

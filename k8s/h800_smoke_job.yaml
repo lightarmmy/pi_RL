@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xufanghui-pirl-smoke-20261027-0030
+  namespace: dreamzero-training
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 7200
+  template:
+    spec:
+      restartPolicy: Never
+      enableServiceLinks: false
+      imagePullSecrets:
+        - name: registry-secret
+      containers:
+        - name: trainer
+          image: registry.d-robotics.cc/auwomo-auwomo/nemo-wan-training@sha256:d7c1f21e8dfc60051ccf6adb8141505736922ffb3c5fc2d960bd973bb40ed8fe
+          env:
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: compute,utility,graphics,display
+            - name: MUJOCO_EGL_DEVICE_ID
+              value: "0"
+          command: ["bash", "-lc"]
+          args:
+            - |
+              set -euo pipefail
+              apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=15 update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends libegl1 libopengl0 libgl1-mesa-dri
+              cd /mnt/auwomo-data/xufanghui/pi_RL
+              mkdir -p /root/.cache/openpi/big_vision
+              cp artifacts/openpi_tokenizer/paligemma_tokenizer.model /root/.cache/openpi/paligemma_tokenizer.model
+              cp artifacts/openpi_tokenizer/paligemma_tokenizer.model /root/.cache/openpi/big_vision/paligemma_tokenizer.model
+              /mnt/auwomo-data/xufanghui/pi_RL/.venv_h800/bin/python scripts/check_checkpoint.py artifacts/public_pi05_libero --norm-stats artifacts/public_pi05_libero/physical-intelligence/libero/norm_stats.json --expected-layout openpi_pytorch
+              /mnt/auwomo-data/xufanghui/pi_RL/.venv_h800/bin/python scripts/launch.py sim-smoke --execute --run-dir /mnt/auwomo-data/xufanghui/pi_RL/runs/h800-smoke-20261027-0030
+          resources:
+            requests:
+              cpu: "32"
+              memory: 256Gi
+              nvidia.com/gpu: "8"
+            limits:
+              cpu: "64"
+              memory: 512Gi
+              nvidia.com/gpu: "8"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /mnt/auwomo-data
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: shared-data
+          hostPath: {path: /mnt/auwomo-data, type: Directory}
+        - name: dshm
+          emptyDir: {medium: Memory, sizeLimit: 64Gi}

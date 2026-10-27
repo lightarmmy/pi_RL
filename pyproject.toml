@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pi-rl-real"
+version = "0.1.0"
+description = "Robot-facing rollout tools for a pinned RLinf/OpenPI πRL project"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26"]
+
+[tool.setuptools.packages.find]
+include = ["pi_rl_real*"]

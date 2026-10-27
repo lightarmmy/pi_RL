@@ -1,0 +1,21 @@
+{
+  "RLinf": {
+    "url": "https://github.com/RLinf/RLinf.git",
+    "commit": "8fc378bceb3e761442e9bd0936a682455b4d35b8"
+  },
+  "openpi": {
+    "url": "https://github.com/Physical-Intelligence/openpi.git",
+    "commit": "215abfb217dbac7d5f1273282331b9b1866c0479"
+  },
+  "public_sft": {
+    "repo": "RLinf/RLinf-Pi05-LIBERO-SFT",
+    "revision": "45ccfcc4e28634f1576ebf78cab0fbe2fd82432d",
+    "model_file_size": 7473091464,
+    "model_sha256": "4616e4c1966a5fb063b442ea5d69857f45e873222d839b794634d87d252ab9e7"
+  },
+  "tokenizer": {
+    "repo": "RLinf/openpi_tokenizer",
+    "revision": "befaa248e4f82954b625a421658f933dfd1a97a0",
+    "sha256": "8986bb4f423f07f8c7f70d0dbe3526fb2316056c17bae71b1ea975e77a168fc6"
+  }
+}

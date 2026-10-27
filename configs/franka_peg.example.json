@@ -1,0 +1,10 @@
+{
+  "robot_ip": "REPLACE_WITH_ROBOT_IP",
+  "target_ee_pose": [0.5, 0.0, 0.1, -3.14, 0.0, 0.0],
+  "camera_names": {
+    "REPLACE_WITH_CAMERA_SERIAL": "wrist_1"
+  },
+  "main_image_key": "wrist_1",
+  "model_path": "/absolute/path/to/your/pi05/pytorch/checkpoint",
+  "reward_threshold": [0.015, 0.015, 0.1, 0.2, 0.2, 0.2]
+}
